@@ -36,7 +36,10 @@ db.level = require("./level")(sequelize, Sequelize, DataTypes);
 db.test = require("./test")(sequelize, Sequelize, DataTypes);
 db.testDetail = require("./testDetail")(sequelize, Sequelize, DataTypes);
 db.feedback = require("./feedback")(sequelize, Sequelize, DataTypes);
+db.subject = require("./subject")(sequelize, Sequelize, DataTypes);
 
+// Subject Association
+db.subject.hasMany(db.category, { foreignKey: "subjectId" });
 // Role Association
 db.role.hasMany(db.user, { foreignKey: "roleId" });
 // User Association
@@ -45,6 +48,7 @@ db.user.hasMany(db.feedback, { foreignKey: "userId" });
 db.user.hasMany(db.test, { foreignKey: "userId" });
 // Category Association
 db.category.hasMany(db.question, { foreignKey: "cateId" });
+db.category.belongsTo(db.subject, { foreignKey: "subjectId" });
 // Question Association
 db.question.hasMany(db.answer, { foreignKey: "questionId" });
 db.question.belongsTo(db.level, { foreignKey: "levelId" });
