@@ -10,6 +10,7 @@ const testDetailRoutes = require("./routes/testDetail");
 const userRoutes = require("./routes/user");
 const roleRoutes = require("./routes/role");
 const feedbackRoutes = require("./routes/feedback");
+const subjectRoutes = require("./routes/subject");
 
 const baseRoutes = (controller, route, middleware) => {
   if (middleware === "ignoreGet")
@@ -36,6 +37,7 @@ const apiRoutes = () => {
   userRoutes(app, baseRoutes);
   roleRoutes(app, baseRoutes);
   feedbackRoutes(app, baseRoutes);
+  subjectRoutes(app, baseRoutes);
   return app;
 };
 
