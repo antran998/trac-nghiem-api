@@ -1,7 +1,9 @@
 const bodyParser = require("body-parser");
+const cors = require("cors");
 const apiRoutes = require("../api");
 
 const expressLoader = (app) => {
+  app.use(cors());
   // Middleware that transforms the raw string of req.body into json
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json());
