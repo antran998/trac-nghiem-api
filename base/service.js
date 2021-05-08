@@ -13,13 +13,13 @@ class BaseService {
     for (const key in query) filter[key] = query[key];
     return await this._model.findOne({ where: filter });
   };
-  getAll = async ({
-    search = "",
-    limit = 10,
-    offset = 0,
-    order = "createdAt",
-    direction = "DESC",
-  }) => {
+  getAll = async ({ search, limit, offset, order, direction }) => {
+    if (!search) search = "";
+    if (!limit) limit = 10;
+    if (!offset) offset = 0;
+    if (!order) order = "id";
+    if (!direction) direction = "DESC";
+
     const pagination = {
       order: [[order, direction]],
       limit: +limit,
