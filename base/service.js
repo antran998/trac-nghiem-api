@@ -27,19 +27,9 @@ class BaseService {
     };
     const filters = [];
     for (const key in this._model.rawAttributes) {
-      if (key.includes("At")) {
-        filters.push(
-          this._db.sequelize.where(
-            this._db.sequelize.col(key),
-            "like",
-            "%" + search + "%"
-          )
-        );
-      } else {
-        filters.push({
-          [key]: { [this._Op.like]: "%" + search + "%" },
-        });
-      }
+      filters.push({
+        [key]: { [this._Op.substring]: search },
+      });
     }
     pagination.where = { [this._Op.or]: filters };
     return await this._model.findAndCountAll(pagination);

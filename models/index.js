@@ -39,32 +39,32 @@ db.feedback = require("./feedback")(sequelize, Sequelize, DataTypes);
 db.subject = require("./subject")(sequelize, Sequelize, DataTypes);
 
 // Subject Association
-db.subject.hasMany(db.category, { foreignKey: "subjectId" });
+db.subject.hasMany(db.category, { foreignKey: "subjectId", as: "categories" });
 // Role Association
-db.role.hasMany(db.user, { foreignKey: "roleId" });
+db.role.hasMany(db.user, { foreignKey: "roleId", as: "users" });
 // User Association
-db.user.belongsTo(db.role, { foreignKey: "roleId" });
-db.user.hasMany(db.feedback, { foreignKey: "userId" });
-db.user.hasMany(db.test, { foreignKey: "userId" });
+db.user.belongsTo(db.role, { foreignKey: "roleId", as: "role" });
+db.user.hasMany(db.feedback, { foreignKey: "userId", as: "feedbacks" });
+db.user.hasMany(db.test, { foreignKey: "userId", as: "tests" });
 // Category Association
-db.category.hasMany(db.question, { foreignKey: "cateId" });
-db.category.belongsTo(db.subject, { foreignKey: "subjectId" });
+db.category.hasMany(db.question, { foreignKey: "cateId", as: "questions" });
+db.category.belongsTo(db.subject, { foreignKey: "subjectId", as: "subject" });
 // Question Association
-db.question.hasMany(db.answer, { foreignKey: "questionId" });
-db.question.belongsTo(db.level, { foreignKey: "levelId" });
-db.question.belongsTo(db.category, { foreignKey: "cateId" });
+db.question.hasMany(db.answer, { foreignKey: "questionId", as: "answers" });
+db.question.belongsTo(db.level, { foreignKey: "levelId", as: "level" });
+db.question.belongsTo(db.category, { foreignKey: "cateId", as: "category" });
 // Answer Association
-db.answer.belongsTo(db.question, { foreignKey: "questionId" });
+db.answer.belongsTo(db.question, { foreignKey: "questionId", as: "question" });
 // Level Association
-db.level.hasMany(db.question, { foreignKey: "levelId" });
-db.level.hasMany(db.test, { foreignKey: "levelId" });
+db.level.hasMany(db.question, { foreignKey: "levelId", as: "questions" });
+db.level.hasMany(db.test, { foreignKey: "levelId", as: "tests" });
 // Test Association
-db.test.belongsTo(db.level, { foreignKey: "levelId" });
-db.test.hasMany(db.testDetail, { foreignKey: "testId" });
-db.test.belongsTo(db.user, { foreignKey: "userId" });
+db.test.belongsTo(db.level, { foreignKey: "levelId", as: "level" });
+db.test.hasMany(db.testDetail, { foreignKey: "testId", as: "testDetails" });
+db.test.belongsTo(db.user, { foreignKey: "userId", as: "user" });
 // Test Detail Association
-db.testDetail.belongsTo(db.test, { foreignKey: "testId" });
+db.testDetail.belongsTo(db.test, { foreignKey: "testId", as: "test" });
 // Feedback Association
-db.feedback.belongsTo(db.user, { foreignKey: "userId" });
+db.feedback.belongsTo(db.user, { foreignKey: "userId", as: "user" });
 
 module.exports = db;

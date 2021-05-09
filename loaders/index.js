@@ -5,8 +5,8 @@ const loaders = async (expressApp) => {
   await expressLoader(expressApp);
   console.log("Express connected !");
 
-  await sequelizeLoader();
-  console.log("Database connected");
+  // await sequelizeLoader();
+  // console.log("Database connected");
 };
 
 module.exports = loaders;
