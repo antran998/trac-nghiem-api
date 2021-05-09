@@ -6,7 +6,6 @@ const questionRoutes = require("./routes/question");
 const answerRoutes = require("./routes/answer");
 const levelRoutes = require("./routes/level");
 const testRoutes = require("./routes/test");
-const testDetailRoutes = require("./routes/testDetail");
 const userRoutes = require("./routes/user");
 const roleRoutes = require("./routes/role");
 const feedbackRoutes = require("./routes/feedback");
@@ -33,7 +32,6 @@ const apiRoutes = () => {
   answerRoutes(app, baseRoutes);
   levelRoutes(app, baseRoutes);
   testRoutes(app, baseRoutes);
-  testDetailRoutes(app, baseRoutes);
   userRoutes(app, baseRoutes);
   roleRoutes(app, baseRoutes);
   feedbackRoutes(app, baseRoutes);

@@ -39,6 +39,10 @@ class AnswerService extends BaseService {
       include: [{ model: this._db.question, as: "question" }],
     });
   };
+
+  getAllWithIds = async (ids) => {
+    return await this._model.findAll({ where: { id: { [this._Op.in]: ids } } });
+  };
 }
 
 module.exports = AnswerService;

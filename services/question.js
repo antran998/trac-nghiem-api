@@ -47,6 +47,15 @@ class QuestionService extends BaseService {
       include: [{ model: this._db.category, as: "category" }],
     });
   };
+
+  getOneWithAnswers = async (query) => {
+    const filter = {};
+    for (const key in query) filter[key] = query[key];
+    return await this._model.findOne({
+      where: filter,
+      include: [{ model: this._db.answer, as: "answers" }],
+    });
+  };
 }
 
 module.exports = QuestionService;
