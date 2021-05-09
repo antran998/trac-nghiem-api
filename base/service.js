@@ -32,7 +32,7 @@ class BaseService {
       });
     }
     pagination.where = { [this._Op.or]: filters };
-    return await this._model.findAndCountAll(pagination);
+    return await this._model.findAndCountAll({ ...pagination });
   };
   create = async (properties) => {
     return await this._model.create(properties);
@@ -45,7 +45,6 @@ class BaseService {
   delete = async (id) => {
     return await this._model.destroy({
       where: { id },
-      force: true,
     });
   };
 }

@@ -13,7 +13,7 @@ class CategoryService extends BaseService {
     offset,
     order,
     direction,
-    subjectName,
+    subjectId,
   }) => {
     if (!search) search = "";
     if (!limit) limit = 10;
@@ -33,11 +33,11 @@ class CategoryService extends BaseService {
       });
     }
 
-    if (subjectName) {
+    if (subjectId) {
       pagination.where = {
         [this._Op.and]: {
           [this._Op.or]: filters,
-          "$subject.name$": { [this._Op.substring]: subjectName },
+          "$subject.id$": subjectId,
         },
       };
     } else {
