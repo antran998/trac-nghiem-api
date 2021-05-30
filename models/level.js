@@ -3,6 +3,9 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING,
     },
+    point: {
+      type: DataTypes.FLOAT,
+    },
   });
   return Level;
 };

@@ -3,6 +3,8 @@ const AnswerService = require("../../services/answer");
 const TestService = require("../../services/test");
 const CategoryService = require("../../services/category");
 const QuestionService = require("../../services/question");
+const LevelService = require("../../services/level");
+const { TestLevels, QuestionLevels } = require("../../ulti/constant");
 
 class TestController extends BaseController {
   constructor() {
@@ -11,64 +13,65 @@ class TestController extends BaseController {
     this._answerService = new AnswerService();
     this._categoryService = new CategoryService();
     this._questionService = new QuestionService();
+    this._levelService = new LevelService();
+    this._testService = new TestService();
   }
 
   create = async (req, res, next) => {
     try {
-      const { body } = req;
+      const { categoryIds, time, amount, subjectId, userId, level } = req.body;
 
-      const categoryIds = body.categoryIds.join(",");
+      const levels = await this._levelService.getAll({ direction: "ASC" });
 
-      const questionListPromise = [];
-      for (const item of body.categoryIds) {
-        const subQuestionPromise = this._questionService.getAllWithCategory({
-          limit: 10000,
-          offset: 0,
-          direction: "ASC",
-          categoryId: item,
-        });
-        questionListPromise.push(subQuestionPromise);
-      }
-      const questions = await Promise.all(questionListPromise);
-
-      let amount = +body.amount;
-      const questionIds = [];
-      while (amount !== 0) {
-        if (questions.length === 0) break;
-        for (const i in questions) {
-          if (questions[i].rows[0]) {
-            questionIds.push(questions[i].rows[0].id);
-            questions[i].rows.shift();
-            amount--;
-            if (amount === 0) break;
-          } else {
-            questions.splice(i);
-            console.log(questions);
-          }
-        }
+      let questionRequested = [];
+      if (level === TestLevels.easy) {
+        questionRequested = this._testService.getQuestionRequested(
+          categoryIds,
+          levels.rows,
+          amount,
+          0.3,
+          0.2,
+          0.1
+        );
+      } else {
+        questionRequested = this._testService.getQuestionRequested(
+          categoryIds,
+          levels.rows,
+          amount,
+          0.2,
+          0.3,
+          0.2
+        );
       }
 
-      if (amount !== 0)
-        throw { status: 422, message: "Vui lòng chọn thêm chương" };
+      const questionPromises = questionRequested.map((item) => {
+        return this._questionService.getListRandomWithCategory(
+          item.cateId,
+          item.id,
+          item.last
+        );
+      });
 
-      const newTest = {
-        time: +body.time * 60,
-        finishTime: +body.time * 60,
-        amount: +body.amount,
-        correctAmount: 0,
-        wrongAmount: 0,
-        eachPoint: 10 / +body.amount,
-        finishPoint: 0,
-        totalPoint: 10,
-        categoryIds,
+      const questionResults = await Promise.all(questionPromises);
+      let finalQuestions = [];
+      for (const questions of questionResults)
+        finalQuestions = finalQuestions.concat(questions);
+
+      const questionIds = finalQuestions.map((item) => item.id);
+      const answerIds = [];
+      for (let i = 0; i < questionIds.length; i++) answerIds.push(-1);
+      const newTest = await this._testService.create({
+        time,
+        amount,
+        categoryIds: categoryIds.join(","),
         questionIds: questionIds.join(","),
-        answerIds: "",
-        subjectId: body.subjectId,
-        levelId: body.levelId,
-        userId: body.userId,
-      };
-      const response = await this._mainService.create(newTest);
-      return this.created(res, response);
+        answerIds: answerIds.join(","),
+        subjectId,
+        userId,
+        level,
+      });
+
+      return this.created(res, newTest);
     } catch (error) {
       return next(error);
     }
@@ -76,33 +79,10 @@ class TestController extends BaseController {
 
   update = async (req, res, next) => {
     try {
-      const { body } = req;
+      const { id, answerIds } = req.body;
 
-      const updatedTest = await this._mainService.getOne({ id: body.id });
+      await this._mainService.update({ answerIds: answerIds.join(","), id });
 
-      const answerIds = body.answerIds.join(",");
-
-      const answerList = await this._answerService.getAllWithIds(
-        body.answerIds
-      );
-      let correctAmount = 0;
-      let wrongAmount = updatedTest.amount;
-      let finishPoint = 0;
-
-      for (const item of answerList) {
-        if (item.isCorrect) {
-          correctAmount++;
-          finishPoint += updatedTest.eachPoint;
-          wrongAmount--;
-        }
-      }
-      updatedTest.finishTime = body.finishTime * 60;
-      updatedTest.correctAmount = correctAmount;
-      updatedTest.wrongAmount = wrongAmount;
-      updatedTest.finishPoint = finishPoint;
-      updatedTest.answerIds = answerIds;
-
-      const response = await this._mainService.update(updatedTest.toJSON());
       return this.noContent(res);
     } catch (error) {
       return next(error);
@@ -122,6 +102,7 @@ class TestController extends BaseController {
       const withResult = req.query.result;
       delete req.query.result;
       const test = await this._mainService.getOne(req.query);
+      if (!test) throw { status: 422, message: "Invalid test" };
 
       const response = test.toJSON();
 
@@ -163,6 +144,12 @@ class TestController extends BaseController {
       response.questions = finalQuestions;
 
       return this.ok(res, response);
+    } catch (error) {
+      return next(error);
+    }
+  };
+  getUserProgress = () => {
+    try {
     } catch (error) {
       return next(error);
     }

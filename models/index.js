@@ -57,9 +57,7 @@ db.question.belongsTo(db.category, { foreignKey: "cateId", as: "category" });
 db.answer.belongsTo(db.question, { foreignKey: "questionId", as: "question" });
 // Level Association
 db.level.hasMany(db.question, { foreignKey: "levelId", as: "questions" });
-db.level.hasMany(db.test, { foreignKey: "levelId", as: "tests" });
 // Test Association
-db.test.belongsTo(db.level, { foreignKey: "levelId", as: "level" });
 db.test.belongsTo(db.user, { foreignKey: "userId", as: "user" });
 db.test.belongsTo(db.subject, { foreignKey: "subjectId", as: "subject" });
 // Feedback Association

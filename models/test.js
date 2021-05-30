@@ -3,25 +3,7 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
     time: {
       type: DataTypes.FLOAT,
     },
-    finishTime: {
-      type: DataTypes.FLOAT,
-    },
     amount: {
-      type: DataTypes.FLOAT,
-    },
-    correctAmount: {
-      type: DataTypes.FLOAT,
-    },
-    wrongAmount: {
-      type: DataTypes.FLOAT,
-    },
-    eachPoint: {
-      type: DataTypes.FLOAT,
-    },
-    finishPoint: {
-      type: DataTypes.FLOAT,
-    },
-    totalPoint: {
       type: DataTypes.FLOAT,
     },
     categoryIds: {
@@ -31,6 +13,9 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
       type: DataTypes.TEXT,
     },
     answerIds: {
+      type: DataTypes.TEXT,
+    },
+    level: {
       type: DataTypes.TEXT,
     },
   });

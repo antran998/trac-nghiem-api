@@ -5,6 +5,7 @@ class QuestionService extends BaseService {
     super();
     this._model = this._db.question;
     this._Op = this._db.Sequelize.Op;
+    this._literal = this._db.Sequelize.literal;
   }
 
   getAllWithCategory = async ({
@@ -54,6 +55,17 @@ class QuestionService extends BaseService {
     return await this._model.findOne({
       where: filter,
       include: [{ model: this._db.answer, as: "answers" }],
+    });
+  };
+
+  getListRandomWithCategory = async (cateId, levelId, limit) => {
+    return this._model.findAll({
+      where: {
+        cateId,
+        levelId,
+      },
+      order: this._literal("rand()"),
+      limit,
     });
   };
 }
