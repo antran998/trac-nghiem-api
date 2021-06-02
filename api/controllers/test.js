@@ -148,7 +148,7 @@ class TestController extends BaseController {
 
       if (test.cateIds !== "") {
         const cateIds = test.categoryIds.split(",");
-        console.log(cateIds);
+
         response.categories = await Promise.all(
           cateIds.map((item) => {
             return this._categoryService.getOne({ id: item });

@@ -187,6 +187,8 @@ class TestService extends BaseService {
       if (resultMap[cateId].point >= 8.5) status = "perfect";
       resultMap[cateId].status = status;
     }
+
+    for (const cate of categories) resultMap[cate.id].name = cate.name;
     return resultMap;
   };
 
