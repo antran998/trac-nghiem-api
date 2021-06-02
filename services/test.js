@@ -113,6 +113,83 @@ class TestService extends BaseService {
 
     return questionRequested;
   };
+
+  calculateResult = (resultPerCate) => {
+    const { observe, understand, use, master } = QuestionLevels;
+    const item = resultPerCate;
+    const corrects =
+      item[observe].correct * 1 +
+      item[understand].correct * 2 +
+      item[use].correct * 3 +
+      item[master].correct * 4;
+    const totals =
+      item[observe].total * 1 +
+      item[understand].total * 2 +
+      item[use].total * 3 +
+      item[master].total * 4;
+    return (corrects / totals) * 10;
+  };
+
+  getTestResult = (questions, answers, categories, levelsMap) => {
+    const { observe, understand, use, master } = QuestionLevels;
+    const resultMap = {};
+
+    for (const cate of categories) {
+      resultMap[cate.id] = {
+        [observe]: {
+          correct: 0,
+          total: 0,
+        },
+        [understand]: {
+          correct: 0,
+          total: 0,
+        },
+        [use]: {
+          correct: 0,
+          total: 0,
+        },
+        [master]: {
+          correct: 0,
+          total: 0,
+        },
+      };
+    }
+
+    for (const index in questions) {
+      const question = questions[index];
+      const answer = question.answers.find(
+        (item) => item.id === +answers[index]
+      );
+
+      const level = levelsMap[question.levelId];
+      if (answer && answer.isCorrect)
+        resultMap[question.cateId][level].correct++;
+      resultMap[question.cateId][level].total++;
+    }
+
+    for (const cateId in resultMap) {
+      let percent = 0;
+      let corrects = 0;
+      let total = 0;
+      for (const level in resultMap[cateId]) {
+        const item = resultMap[cateId][level];
+        corrects += item.correct;
+        total += item.total;
+      }
+      resultMap[cateId].corrects = corrects;
+      resultMap[cateId].total = total;
+      resultMap[cateId].percent = corrects / total;
+      resultMap[cateId].point = this.calculateResult(resultMap[cateId]);
+      let status = "weak";
+      if (resultMap[cateId].point >= 5 && resultMap[cateId].point < 7)
+        status = "average";
+      if (resultMap[cateId].point >= 7 && resultMap[cateId].point < 8.5)
+        status = "good";
+      if (resultMap[cateId].point >= 8.5) status = "perfect";
+      resultMap[cateId].status = status;
+    }
+    return resultMap;
+  };
 }
 
 module.exports = TestService;

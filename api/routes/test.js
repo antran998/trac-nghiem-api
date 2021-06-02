@@ -9,6 +9,7 @@ const testRoutes = (app, baseRoutes) => {
   app.use("/test", route);
 
   baseRoutes(controller, route, "ignoreGet");
+  route.get("/result", controller.getTestResult);
 };
 
 module.exports = testRoutes;

@@ -148,8 +148,84 @@ class TestController extends BaseController {
       return next(error);
     }
   };
-  getUserProgress = () => {
+
+  getTestResult = async (req, res, next) => {
     try {
+      const { id } = req.query;
+      const test = await this._mainService.getOne({ id });
+      if (!test) throw { status: 422, message: "Invalid test" };
+
+      let categories = [];
+      let questions = [];
+
+      const cateIds = test.categoryIds.split(",");
+      if (test.cateIds !== "") {
+        categories = await this._categoryService.getListWithIds(cateIds);
+      }
+
+      const questionIds = test.questionIds.split(",");
+      if (test.questionIds !== "") {
+        questions = await Promise.all(
+          questionIds.map((item) => {
+            return this._questionService.getOneWithAnswers({ id: item });
+          })
+        );
+      }
+      const answerIds = test.answerIds.split(",");
+
+      const levels = await this._levelService.getAll({ direction: "ASC" });
+      const levelsMap = {};
+      for (const item of levels.rows) levelsMap[item.id] = item.name;
+
+      const results = this._mainService.getTestResult(
+        questions,
+        answerIds,
+        categories,
+        levelsMap
+      );
+
+      return this.ok(res, results);
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  getListTestResult = async (req, res, next) => {
+    try {
+      const { id } = req.query;
+      const test = await this._mainService.getOne({ id });
+      if (!test) throw { status: 422, message: "Invalid test" };
+
+      let categories = [];
+      let questions = [];
+
+      const cateIds = test.categoryIds.split(",");
+      if (test.cateIds !== "") {
+        categories = await this._categoryService.getListWithIds(cateIds);
+      }
+
+      const questionIds = test.questionIds.split(",");
+      if (test.questionIds !== "") {
+        questions = await Promise.all(
+          questionIds.map((item) => {
+            return this._questionService.getOneWithAnswers({ id: item });
+          })
+        );
+      }
+      const answerIds = test.answerIds.split(",");
+
+      const levels = await this._levelService.getAll({ direction: "ASC" });
+      const levelsMap = {};
+      for (const item of levels.rows) levelsMap[item.id] = item.name;
+
+      const results = this._mainService.getTestResult(
+        questions,
+        answerIds,
+        categories,
+        levelsMap
+      );
+
+      return this.ok(res, results);
     } catch (error) {
       return next(error);
     }

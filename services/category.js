@@ -56,6 +56,16 @@ class CategoryService extends BaseService {
       ],
     });
   };
+
+  getListWithIds = (ids) => {
+    return this._model.findAll({
+      where: {
+        id: {
+          [this._Op.in]: ids,
+        },
+      },
+    });
+  };
 }
 
 module.exports = CategoryService;
