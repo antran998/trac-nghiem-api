@@ -15,7 +15,7 @@ class TestService extends BaseService {
     order,
     direction,
     subjectId,
-    levelId,
+    level,
     userId,
   }) => {
     if (!search) search = "";
@@ -38,7 +38,7 @@ class TestService extends BaseService {
 
     const idFilter = [];
     if (subjectId) idFilter.push({ "$subject.id$": subjectId });
-    if (levelId) idFilter.push({ "$level.id$": levelId });
+    if (level) idFilter.push({ level });
     if (userId) idFilter.push({ "$user.id$": userId });
 
     if (idFilter.length > 0) {
@@ -50,7 +50,6 @@ class TestService extends BaseService {
       ...pagination,
       include: [
         { model: this._db.subject, as: "subject" },
-        { model: this._db.level, as: "level" },
         { model: this._db.user, as: "user" },
       ],
     });
@@ -189,6 +188,23 @@ class TestService extends BaseService {
       resultMap[cateId].status = status;
     }
     return resultMap;
+  };
+
+  getListByCategory = (cateId, userId, limit = 100000) => {
+    return this._model.findAll({
+      where: {
+        categoryIds: {
+          [this._Op.or]: {
+            [this._Op.regexp]: `,${cateId},`,
+            [this._Op.regexp]: `,${cateId}$`,
+            [this._Op.regexp]: `^${cateId},`,
+          },
+        },
+        userId,
+      },
+      order: [["id", "DESC"]],
+      limit,
+    });
   };
 }
 

@@ -4,6 +4,7 @@ const TestService = require("../../services/test");
 const CategoryService = require("../../services/category");
 const QuestionService = require("../../services/question");
 const LevelService = require("../../services/level");
+const ResultService = require("../../services/result");
 const { TestLevels, QuestionLevels } = require("../../ulti/constant");
 
 class TestController extends BaseController {
@@ -15,6 +16,7 @@ class TestController extends BaseController {
     this._questionService = new QuestionService();
     this._levelService = new LevelService();
     this._testService = new TestService();
+    this._resultService = new ResultService();
   }
 
   create = async (req, res, next) => {
@@ -82,6 +84,44 @@ class TestController extends BaseController {
       const { id, answerIds } = req.body;
 
       await this._mainService.update({ answerIds: answerIds.join(","), id });
+
+      const test = await this._mainService.getOne({ id });
+      if (!test) throw { status: 422, message: "Invalid test" };
+
+      let categories = [];
+      let questions = [];
+
+      const cateIds = test.categoryIds.split(",");
+      if (test.cateIds !== "") {
+        categories = await this._categoryService.getListWithIds(cateIds);
+      }
+
+      const questionIds = test.questionIds.split(",");
+      if (test.questionIds !== "") {
+        questions = await Promise.all(
+          questionIds.map((item) => {
+            return this._questionService.getOneWithAnswers({ id: item });
+          })
+        );
+      }
+      const tempAnswerIds = test.answerIds.split(",");
+
+      const levels = await this._levelService.getAll({ direction: "ASC" });
+      const levelsMap = {};
+      for (const item of levels.rows) levelsMap[item.id] = item.name;
+
+      const results = this._mainService.getTestResult(
+        questions,
+        tempAnswerIds,
+        categories,
+        levelsMap
+      );
+
+      await this._resultService.create({
+        data: JSON.stringify(results),
+        userId: test.userId,
+        testId: test.id,
+      });
 
       return this.noContent(res);
     } catch (error) {
@@ -152,80 +192,68 @@ class TestController extends BaseController {
   getTestResult = async (req, res, next) => {
     try {
       const { id } = req.query;
-      const test = await this._mainService.getOne({ id });
-      if (!test) throw { status: 422, message: "Invalid test" };
 
-      let categories = [];
-      let questions = [];
+      const result = await this._resultService.getOne({ testId: id });
+      if (!result) throw { status: 422, message: "Invalid test" };
 
-      const cateIds = test.categoryIds.split(",");
-      if (test.cateIds !== "") {
-        categories = await this._categoryService.getListWithIds(cateIds);
-      }
+      const response = JSON.parse(result.data);
 
-      const questionIds = test.questionIds.split(",");
-      if (test.questionIds !== "") {
-        questions = await Promise.all(
-          questionIds.map((item) => {
-            return this._questionService.getOneWithAnswers({ id: item });
-          })
-        );
-      }
-      const answerIds = test.answerIds.split(",");
-
-      const levels = await this._levelService.getAll({ direction: "ASC" });
-      const levelsMap = {};
-      for (const item of levels.rows) levelsMap[item.id] = item.name;
-
-      const results = this._mainService.getTestResult(
-        questions,
-        answerIds,
-        categories,
-        levelsMap
-      );
-
-      return this.ok(res, results);
+      return this.ok(res, response);
     } catch (error) {
       return next(error);
     }
   };
 
-  getListTestResult = async (req, res, next) => {
+  getReview = async (req, res, next) => {
     try {
-      const { id } = req.query;
-      const test = await this._mainService.getOne({ id });
-      if (!test) throw { status: 422, message: "Invalid test" };
+      const { userId, categoryId } = req.query;
 
-      let categories = [];
-      let questions = [];
-
-      const cateIds = test.categoryIds.split(",");
-      if (test.cateIds !== "") {
-        categories = await this._categoryService.getListWithIds(cateIds);
-      }
-
-      const questionIds = test.questionIds.split(",");
-      if (test.questionIds !== "") {
-        questions = await Promise.all(
-          questionIds.map((item) => {
-            return this._questionService.getOneWithAnswers({ id: item });
-          })
-        );
-      }
-      const answerIds = test.answerIds.split(",");
-
-      const levels = await this._levelService.getAll({ direction: "ASC" });
-      const levelsMap = {};
-      for (const item of levels.rows) levelsMap[item.id] = item.name;
-
-      const results = this._mainService.getTestResult(
-        questions,
-        answerIds,
-        categories,
-        levelsMap
+      const tests = await this._mainService.getListByCategory(
+        categoryId,
+        userId,
+        3
       );
+      const testIds = tests.map((item) => item.id);
 
-      return this.ok(res, results);
+      const results = await this._resultService.getListByTest(testIds);
+      const resultData = results.map((item) => ({
+        ...JSON.parse(item.data)[categoryId],
+      }));
+
+      const total = resultData.reduce((sum, item) => sum + item.point * 10, 0);
+
+      const percents = resultData.map((item) => item.point * 10);
+      const averagePercent = total / resultData.length;
+
+      return this.ok(res, { averagePercent, percents });
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  getResultData = async (req, res, next) => {
+    try {
+      const { userId, categoryId } = req.query;
+
+      const tests = await this._mainService.getListByCategory(
+        categoryId,
+        userId
+      );
+      const testIds = tests.map((item) => item.id);
+
+      const results = await this._resultService.getListByTest(testIds);
+      const resultData = results.map((item) => ({
+        ...JSON.parse(item.data)[categoryId],
+      }));
+
+      const data = resultData.map((item, index) => ({
+        testId: results[index].testId,
+        percent: item.point * 10,
+        createdAt: tests[index].createdAt,
+        maxPercent: 100,
+      }));
+
+      return this.ok(res, data);
     } catch (error) {
       return next(error);
     }
