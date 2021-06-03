@@ -9,6 +9,9 @@ const userRoutes = (app, baseRoutes) => {
   app.use("/user", route);
 
   baseRoutes(controller, route, "ignoreGet");
+  route.get("/highest-test", controller.getUsersWithHighestTest);
+  route.get("/good-result", controller.getUserWithGoodTest);
+  route.get("/result-subject", controller.getUserWithSubjectResult);
 };
 
 module.exports = userRoutes;

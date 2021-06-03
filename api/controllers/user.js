@@ -1,5 +1,7 @@
 const BaseController = require("../../base/controller");
+const ResultService = require("../../services/result");
 const RoleService = require("../../services/role");
+const TestService = require("../../services/test");
 const UserService = require("../../services/user");
 
 class CategoryController extends BaseController {
@@ -7,6 +9,8 @@ class CategoryController extends BaseController {
     super();
     this._mainService = new UserService();
     this._roleService = new RoleService();
+    this._testService = new TestService();
+    this._resultService = new ResultService();
   }
 
   login = async (req, res, next) => {
@@ -55,6 +59,33 @@ class CategoryController extends BaseController {
       delete payload.password;
       const token = this._mainService.generateToken(payload);
       return this.ok(res, { token });
+    } catch (error) {
+      return next(error);
+    }
+  };
+  getUsersWithHighestTest = async (req, res, next) => {
+    try {
+      const users = await this._testService.getHighestTestByUsers();
+      return this.ok(res, users);
+    } catch (error) {
+      return next(error);
+    }
+  };
+  getUserWithGoodTest = async (req, res, next) => {
+    try {
+      const users = await this._resultService.getGoodAverageResult();
+      return this.ok(res, users);
+    } catch (error) {
+      return next(error);
+    }
+  };
+  getUserWithSubjectResult = async (req, res, next) => {
+    try {
+      const { subjectId } = req.query;
+      const users = await this._resultService.getAverageResultBySubjects(
+        subjectId
+      );
+      return this.ok(res, users);
     } catch (error) {
       return next(error);
     }

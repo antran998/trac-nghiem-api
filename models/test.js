@@ -18,6 +18,12 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
     level: {
       type: DataTypes.TEXT,
     },
+    correctCount: {
+      type: DataTypes.FLOAT,
+    },
+    wrongCount: {
+      type: DataTypes.FLOAT,
+    },
   });
   return Test;
 };

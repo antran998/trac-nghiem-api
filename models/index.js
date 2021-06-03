@@ -41,6 +41,7 @@ db.result = require("./result")(sequelize, Sequelize, DataTypes);
 // Subject Association
 db.subject.hasMany(db.category, { foreignKey: "subjectId", as: "categories" });
 db.subject.hasMany(db.test, { foreignKey: "subjectId", as: "tests" });
+db.subject.hasMany(db.result, { foreignKey: "subjectId", as: "results" });
 // Role Association
 db.role.hasMany(db.user, { foreignKey: "roleId", as: "users" });
 // User Association
@@ -68,5 +69,6 @@ db.feedback.belongsTo(db.user, { foreignKey: "userId", as: "user" });
 // Result Association
 db.result.belongsTo(db.user, { foreignKey: "userId", as: "user" });
 db.result.belongsTo(db.test, { foreignKey: "testId", as: "test" });
+db.result.belongsTo(db.subject, { foreignKey: "subjectId", as: "subject" });
 
 module.exports = db;

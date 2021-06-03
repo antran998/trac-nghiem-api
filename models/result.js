@@ -3,6 +3,9 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
     data: {
       type: DataTypes.TEXT,
     },
+    correctPercent: {
+      type: DataTypes.FLOAT,
+    },
   });
   return Result;
 };

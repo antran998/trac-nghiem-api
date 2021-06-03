@@ -71,6 +71,8 @@ class TestController extends BaseController {
         subjectId,
         userId,
         level,
+        correctCount: 0,
+        wrongCount: questionIds.length,
       });
 
       return this.created(res, newTest);
@@ -82,8 +84,6 @@ class TestController extends BaseController {
   update = async (req, res, next) => {
     try {
       const { id, answerIds } = req.body;
-
-      await this._mainService.update({ answerIds: answerIds.join(","), id });
 
       const test = await this._mainService.getOne({ id });
       if (!test) throw { status: 422, message: "Invalid test" };
@@ -104,7 +104,6 @@ class TestController extends BaseController {
           })
         );
       }
-      const tempAnswerIds = test.answerIds.split(",");
 
       const levels = await this._levelService.getAll({ direction: "ASC" });
       const levelsMap = {};
@@ -112,15 +111,32 @@ class TestController extends BaseController {
 
       const results = this._mainService.getTestResult(
         questions,
-        tempAnswerIds,
+        answerIds,
         categories,
         levelsMap
       );
+
+      let correctCount = 0;
+      let wrongCount = questionIds.length;
+
+      for (const key in results) {
+        correctCount += results[key].corrects;
+        wrongCount -= results[key].corrects;
+      }
+
+      await this._mainService.update({
+        answerIds: answerIds.join(","),
+        wrongCount,
+        correctCount,
+        id,
+      });
 
       await this._resultService.create({
         data: JSON.stringify(results),
         userId: test.userId,
         testId: test.id,
+        subjectId: test.subjectId,
+        correctPercent: (correctCount / questionIds.length) * 100,
       });
 
       return this.noContent(res);

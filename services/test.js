@@ -1,11 +1,13 @@
 const BaseService = require("../base/service");
 const { QuestionLevels } = require("../ulti/constant");
+const { QueryTypes } = require("sequelize");
 
 class TestService extends BaseService {
   constructor() {
     super();
     this._model = this._db.test;
     this._Op = this._db.Sequelize.Op;
+    this._sequelize = this._db.sequelize;
   }
 
   getAllWithFilter = async ({
@@ -195,18 +197,28 @@ class TestService extends BaseService {
   getListByCategory = (cateId, userId, limit = 100000) => {
     return this._model.findAll({
       where: {
-        categoryIds: {
-          [this._Op.or]: {
-            [this._Op.regexp]: `,${cateId},`,
-            [this._Op.regexp]: `,${cateId}$`,
-            [this._Op.regexp]: `^${cateId},`,
+        [this._Op.and]: {
+          categoryIds: {
+            [this._Op.or]: [
+              { [this._Op.regexp]: `^${cateId},` },
+              { [this._Op.regexp]: `,${cateId},` },
+              { [this._Op.regexp]: `,${cateId}$` },
+            ],
           },
+          userId,
         },
-        userId,
       },
       order: [["id", "DESC"]],
       limit,
     });
+  };
+  getHighestTestByUsers = () => {
+    return this._sequelize.query(
+      "SELECT userId, name, count(userId) as amount FROM final.test INNER JOIN final.user on final.test.userId = final.user.id group by userId order by amount DESC",
+      {
+        type: QueryTypes.SELECT,
+      }
+    );
   };
 }
 
