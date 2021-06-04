@@ -1,4 +1,5 @@
 const BaseController = require("../../base/controller");
+const FeedbackService = require("../../services/feedback");
 const ResultService = require("../../services/result");
 const RoleService = require("../../services/role");
 const TestService = require("../../services/test");
@@ -11,6 +12,7 @@ class CategoryController extends BaseController {
     this._roleService = new RoleService();
     this._testService = new TestService();
     this._resultService = new ResultService();
+    this._feedbackService = new FeedbackService();
   }
 
   login = async (req, res, next) => {
@@ -25,6 +27,9 @@ class CategoryController extends BaseController {
       if (!checkPassword)
         return this.error(res, 422, "Email hoặc mật khẩu sai");
       const role = await this._roleService.getOne({ id: existedUser.roleId });
+      const feedback = await this._feedbackService.getOne({
+        userId: existedUser.id,
+      });
       const payload = {
         id: existedUser.id,
         email: existedUser.email,
@@ -32,6 +37,7 @@ class CategoryController extends BaseController {
         phone: existedUser.phone,
         roleId: existedUser.roleId,
         role: role.name,
+        hasFeedback: feedback ? true : false,
       };
       const token = this._mainService.generateToken(payload);
       this.ok(res, { token });
@@ -55,7 +61,12 @@ class CategoryController extends BaseController {
         roleId: role.id,
       };
       const createdUser = await this._mainService.create(newUser);
-      const payload = { ...newUser, role: role.name, id: createdUser.id };
+      const payload = {
+        ...newUser,
+        role: role.name,
+        id: createdUser.id,
+        hasFeedback: false,
+      };
       delete payload.password;
       const token = this._mainService.generateToken(payload);
       return this.ok(res, { token });

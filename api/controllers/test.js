@@ -62,6 +62,10 @@ class TestController extends BaseController {
       const questionIds = finalQuestions.map((item) => item.id);
       const answerIds = [];
       for (let i = 0; i < questionIds.length; i++) answerIds.push(-1);
+
+      const now = new Date();
+      const finishTime = new Date(now.getTime() + time * 60000);
+
       const newTest = await this._testService.create({
         time,
         amount,
@@ -73,6 +77,7 @@ class TestController extends BaseController {
         level,
         correctCount: 0,
         wrongCount: questionIds.length,
+        finishTime: finishTime.valueOf().toString(),
       });
 
       return this.created(res, newTest);
@@ -84,6 +89,10 @@ class TestController extends BaseController {
   update = async (req, res, next) => {
     try {
       const { id, answerIds } = req.body;
+
+      const existedResult = await this._resultService.getOne({ testId: id });
+      if (existedResult)
+        throw { status: 422, message: "This test was complete" };
 
       const test = await this._mainService.getOne({ id });
       if (!test) throw { status: 422, message: "Invalid test" };
@@ -124,11 +133,14 @@ class TestController extends BaseController {
         wrongCount -= results[key].corrects;
       }
 
+      const now = new Date();
+
       await this._mainService.update({
         answerIds: answerIds.join(","),
         wrongCount,
         correctCount,
         id,
+        finishTime: now.valueOf(),
       });
 
       await this._resultService.create({

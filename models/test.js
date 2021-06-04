@@ -24,6 +24,9 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
     wrongCount: {
       type: DataTypes.FLOAT,
     },
+    finishTime: {
+      type: DataTypes.TEXT,
+    },
   });
   return Test;
 };

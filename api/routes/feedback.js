@@ -9,6 +9,8 @@ const feedbackRoutes = (app, baseRoutes) => {
   app.use("/feedback", route);
 
   baseRoutes(controller, route, "ignoreGet");
+  route.get("/avg", controller.getAvgRating);
+  route.get("/statistic", controller.getRatingStatistic);
 };
 
 module.exports = feedbackRoutes;

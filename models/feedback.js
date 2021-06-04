@@ -6,6 +6,9 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
     title: {
       type: DataTypes.STRING,
     },
+    rate: {
+      type: DataTypes.FLOAT,
+    },
   });
   return Feedback;
 };
