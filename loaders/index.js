@@ -2,6 +2,7 @@ const expressLoader = require("./express");
 const sequelizeLoader = require("./sequelize");
 
 const loaders = async (expressApp) => {
+  global.autoUpdate = {};
   await expressLoader(expressApp);
   console.log("Express connected !");
 

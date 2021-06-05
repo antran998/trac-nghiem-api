@@ -6,6 +6,7 @@ const QuestionService = require("../../services/question");
 const LevelService = require("../../services/level");
 const ResultService = require("../../services/result");
 const { TestLevels, QuestionLevels } = require("../../ulti/constant");
+const { default: axios } = require("axios");
 
 class TestController extends BaseController {
   constructor() {
@@ -66,7 +67,7 @@ class TestController extends BaseController {
       const now = new Date();
       const finishTime = new Date(now.getTime() + time * 60000);
 
-      const newTest = await this._testService.create({
+      const newTest = await this._mainService.create({
         time,
         amount,
         categoryIds: categoryIds.join(","),
@@ -79,6 +80,29 @@ class TestController extends BaseController {
         wrongCount: questionIds.length,
         finishTime: finishTime.valueOf().toString(),
       });
+
+      const author = req.get("Authorization");
+      const data = {
+        id: newTest.id,
+        answerIds: [
+          -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+          -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        ],
+      };
+      global.autoUpdate[newTest.id] = setTimeout(() => {
+        axios
+          .put("http://localhost:3000/api/test", data, {
+            headers: {
+              Authorization: author,
+            },
+          })
+          .then((res) =>
+            console.info(">>>>>>> Auto complete testId: " + newTest.id)
+          )
+          .catch((error) =>
+            console.error(">>>>>>> Auto update fail", error.message)
+          );
+      }, (time + 1) * 60000);
 
       return this.created(res, newTest);
     } catch (error) {
@@ -150,6 +174,9 @@ class TestController extends BaseController {
         subjectId: test.subjectId,
         correctPercent: (correctCount / questionIds.length) * 100,
       });
+
+      clearTimeout(global.autoUpdate[id]);
+      delete global.autoUpdate[id];
 
       return this.noContent(res);
     } catch (error) {
