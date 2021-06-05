@@ -6,6 +6,22 @@ class FeedbackController extends BaseController {
     super();
     this._mainService = new FeedbackService();
   }
+  getAll = async (req, res, next) => {
+    try {
+      const response = await this._mainService.getAll(req.query);
+      return this.paging(res, response);
+    } catch (error) {
+      return next(error);
+    }
+  };
+  getOne = async (req, res, next) => {
+    try {
+      const response = await this._mainService.getOne(req.query);
+      return this.ok(res, response);
+    } catch (error) {
+      return next(error);
+    }
+  };
   getAvgRating = async (req, res, next) => {
     try {
       const result = await this._mainService.getAvgRating();
