@@ -22,7 +22,7 @@ class ResultService extends BaseService {
     return this._sequelize.query(
       `
       SELECT name, userId, avg(correctPercent) as avgPercent 
-      FROM final.result inner join final.user 
+      FROM final.result inner join final.user on userId = final.user.id
       where (select avg(correctPercent) from final.result) >= 50
       group by userId
       order by avgPercent DESC
@@ -36,9 +36,9 @@ class ResultService extends BaseService {
     return this._sequelize.query(
       `
       SELECT name, userId, avg(correctPercent) as avgPercent 
-      FROM final.result inner join final.user 
-      where subjectId = ?
-      group by userId
+      FROM final.result inner join final.user on userId = final.user.id
+      where subjectId = 3
+      group by userId;
       `,
       {
         replacements: [subjectId],

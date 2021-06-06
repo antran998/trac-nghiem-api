@@ -59,7 +59,7 @@ class FeedbackService extends BaseService {
   };
   getRatingAmount = (rate) => {
     return this._sequelize.query(
-      "SELECT sum(rate) as amount FROM final.feedback where rate = ?",
+      "SELECT count(rate) as amount FROM final.feedback where rate = ?",
       {
         replacements: [rate],
         type: QueryTypes.SELECT,
