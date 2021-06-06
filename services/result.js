@@ -37,7 +37,7 @@ class ResultService extends BaseService {
       `
       SELECT name, userId, avg(correctPercent) as avgPercent 
       FROM final.result inner join final.user on userId = final.user.id
-      where subjectId = 3
+      where subjectId = ?
       group by userId;
       `,
       {
