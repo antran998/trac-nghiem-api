@@ -12,6 +12,7 @@ const userRoutes = (app, baseRoutes) => {
   route.get("/highest-test", controller.getUsersWithHighestTest);
   route.get("/good-result", controller.getUserWithGoodTest);
   route.get("/result-subject", controller.getUserWithSubjectResult);
+  route.get("/statistic-subject", controller.getSubjectStatistic);
 };
 
 module.exports = userRoutes;

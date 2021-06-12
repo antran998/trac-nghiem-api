@@ -101,6 +101,18 @@ class CategoryController extends BaseController {
       return next(error);
     }
   };
+  getSubjectStatistic = async (req, res, next) => {
+    try {
+      const { userId } = req.query;
+      const result = await this._resultService.getSubjectStatisticByUser(
+        userId
+      );
+
+      return this.ok(res, result);
+    } catch (error) {
+      return next(error);
+    }
+  };
 }
 
 module.exports = CategoryController;

@@ -46,6 +46,20 @@ class ResultService extends BaseService {
       }
     );
   };
+  getSubjectStatisticByUser = (userId) => {
+    return this._sequelize.query(
+      `
+      SELECT subjectId, final.subject.name, avg(correctPercent) as percent 
+      FROM final.result inner join final.subject on final.result.subjectId = final.subject.id 
+      where userId = ?
+      group by subjectId
+      `,
+      {
+        replacements: [userId],
+        type: QueryTypes.SELECT,
+      }
+    );
+  };
 }
 
 module.exports = ResultService;
