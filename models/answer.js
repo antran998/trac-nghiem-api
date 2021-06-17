@@ -1,7 +1,7 @@
 module.exports = (sequelize, Sequelize, DataTypes) => {
   const Answer = sequelize.define("Answer", {
     content: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
     isCorrect: {
       type: DataTypes.BOOLEAN,

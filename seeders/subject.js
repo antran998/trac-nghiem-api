@@ -1,14 +1,10 @@
 const subjectSeeding = (db) => {
   return db.subject.bulkCreate([
-    {name: "Toán" },
-    {name: "Lý" },
-    {name: "Hóa" },
-    {name: "Sinh"},
-    {name: "Tiếng Anh"},
-    {name: "Giáo dục công dân"},
+    {name: "Hóa"},
+    {name: "Lý"},
     {name: "Sử"},
     {name: "Địa"},
-    {name: "Công Nghệ"},
+    {name: "Sinh"},
     {name: "Tin Học"},
   ]);
 };
