@@ -113,6 +113,26 @@ class CategoryController extends BaseController {
       return next(error);
     }
   };
+  changePassword = async (req, res, next) => {
+    try {
+      const { userId, oldPassword, newPassword } = req.body;
+      const existed = await this._mainService.getOne({ id: userId });
+      const isValid = await this._mainService.checkPassword(
+        oldPassword,
+        existed.password
+      );
+      if (!isValid) throw { status: 422, message: "Wrong password" };
+      const hashedPassword = await this._mainService.generatePassword(
+        newPassword
+      );
+
+      await this._mainService.update({ id: userId, password: hashedPassword });
+
+      return this.ok(res, { success: true });
+    } catch (error) {
+      return next(error);
+    }
+  };
 }
 
 module.exports = CategoryController;

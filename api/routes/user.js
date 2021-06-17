@@ -13,6 +13,7 @@ const userRoutes = (app, baseRoutes) => {
   route.get("/good-result", controller.getUserWithGoodTest);
   route.get("/result-subject", controller.getUserWithSubjectResult);
   route.get("/statistic-subject", controller.getSubjectStatistic);
+  route.put("/change-password", controller.changePassword);
 };
 
 module.exports = userRoutes;
